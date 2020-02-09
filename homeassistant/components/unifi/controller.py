@@ -216,12 +216,14 @@ class UniFiController:
                     self._site_role = site["role"]
                     break
 
-        except CannotConnect:
+        except (CannotConnect, AuthenticationRequired):
             raise ConfigEntryNotReady
 
         except Exception as err:  # pylint: disable=broad-except
-            LOGGER.error("Unknown error connecting with UniFi controller: %s", err)
-            return False
+            template = "An exception of type {0} occurred. Arguments:\n{1!r}"
+            message = template.format(type(err).__name__, err.args)
+            LOGGER.error("Unknown error connecting with UniFi controller: %s", message)
+            raise ConfigEntryNotReady
 
         wireless_clients = self.hass.data[UNIFI_WIRELESS_CLIENTS]
         self.wireless_clients = wireless_clients.get_data(self.config_entry)
@@ -378,4 +380,4 @@ async def get_controller(
 
     except aiounifi.AiounifiException:
         LOGGER.exception("Unknown UniFi communication error occurred")
-        raise AuthenticationRequired
+        raise CannotConnect
