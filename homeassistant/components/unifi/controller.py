@@ -216,7 +216,7 @@ class UniFiController:
                     self._site_role = site["role"]
                     break
 
-        except CannotConnect:
+        except (CannotConnect, AuthenticationRequired):
             raise ConfigEntryNotReady
 
         except Exception as err:  # pylint: disable=broad-except
@@ -378,4 +378,4 @@ async def get_controller(
 
     except aiounifi.AiounifiException:
         LOGGER.exception("Unknown UniFi communication error occurred")
-        raise AuthenticationRequired
+        raise CannotConnect
