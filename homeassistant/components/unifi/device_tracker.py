@@ -1,5 +1,6 @@
 """Track devices using UniFi controllers."""
 import logging
+import time
 
 from homeassistant.components.device_tracker import DOMAIN as DEVICE_TRACKER_DOMAIN
 from homeassistant.components.device_tracker.config_entry import ScannerEntity
@@ -33,6 +34,7 @@ DEVICE_ATTRIBUTES = [
     "radio_proto",
     "site_id",
     "vlan",
+    "last_seen",
 ]
 
 
@@ -229,6 +231,8 @@ class UniFiClientTracker(UniFiClient, ScannerEntity):
                 attributes[variable] = self.client.raw[variable]
 
         attributes["is_wired"] = self.is_wired
+        attributes["is_connected"] = self.is_connected
+        attributes["since_last_seen"] = time.time() - attributes["last_seen"]
 
         return attributes
 
